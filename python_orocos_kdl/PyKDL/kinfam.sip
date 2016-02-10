@@ -499,6 +499,32 @@ using namespace KDL;
 public:
     ChainIkSolverPos_LMA(const Chain& chain, double eps=0.00001, int _maxiter=500, double _eps_joints=0.000000000000001);
 
+    void setWeightTS(SIP_PYLIST);
+%MethodCode
+    //Sets L weight values not provided in constructor
+    // Provide 6x1 float vector with Task space weights
+
+    Py_ssize_t numVals;
+    double c_item;
+    PyObject *list=a0;
+    numVals=PyList_Size(list);
+    
+    if (numVals!=6) {
+       sipIsErr=1; //todo: raise exception
+    }
+    Eigen::Matrix<double,6,1> Mx;
+    Mx=Eigen::Matrix<double,6,1>();
+    
+    for (Py_ssize_t r=0;r<numVals;r++) {
+        double v=PyFloat_AsDouble(PyList_GetItem(list,r));
+        Mx(r)=v;
+    }
+    sipCpp->setWeightTS(Mx);    
+    
+%End
+
+    
+    
     virtual int CartToJnt(const JntArray& q_init , const Frame& p_in ,JntArray& q_out);
 };
 

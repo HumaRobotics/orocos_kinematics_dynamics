@@ -111,6 +111,11 @@ ChainIkSolverPos_LMA::ChainIkSolverPos_LMA(
 
 ChainIkSolverPos_LMA::~ChainIkSolverPos_LMA() {}
 
+    
+void ChainIkSolverPos_LMA::setWeightTS(const Eigen::Matrix<double,6,1>& q) {
+    L=q;
+}
+
 void ChainIkSolverPos_LMA::compute_fwdpos(const VectorXq& q) {
 	using namespace KDL;
 	unsigned int jointndx=0;

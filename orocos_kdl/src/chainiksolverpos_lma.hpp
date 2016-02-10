@@ -128,6 +128,14 @@ public:
     virtual ~ChainIkSolverPos_LMA();
 
     /**
+     * \brief Sets Task Space weights 
+     *
+     * Mostly exposed for accessing with Python because the constructor with matrix is not available
+     * \param q 6,1 matrix for weights in task space [x,y,z,wx,wy,wz].
+     */
+    void setWeightTS(const Eigen::Matrix<double,6,1>& q);
+
+    /**
      * \brief for internal use only.
      *
      * Only exposed for test and diagnostic purposes.
