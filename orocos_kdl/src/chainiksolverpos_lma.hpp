@@ -231,6 +231,7 @@ private:
 
     // the following are state of CartToJnt that is pre-allocated:
 
+    bool best_effort;
     VectorXq q;
     MatrixXq A;
     VectorXq tmp;

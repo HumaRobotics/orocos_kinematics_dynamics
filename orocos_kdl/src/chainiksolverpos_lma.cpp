@@ -73,7 +73,8 @@ ChainIkSolverPos_LMA::ChainIkSolverPos_LMA(
 	svd(6, _chain.getNrOfJoints(),Eigen::ComputeThinU | Eigen::ComputeThinV),
 	diffq(_chain.getNrOfJoints()),
 	q_new(_chain.getNrOfJoints()),
-	original_Aii(_chain.getNrOfJoints())
+	original_Aii(_chain.getNrOfJoints()),
+    best_effort(true)
 {}
 
 ChainIkSolverPos_LMA::ChainIkSolverPos_LMA(
@@ -99,7 +100,8 @@ ChainIkSolverPos_LMA::ChainIkSolverPos_LMA(
 	svd(6, _chain.getNrOfJoints(),Eigen::ComputeThinU | Eigen::ComputeThinV),
 	diffq(_chain.getNrOfJoints()),
 	q_new(_chain.getNrOfJoints()),
-	original_Aii(_chain.getNrOfJoints())
+	original_Aii(_chain.getNrOfJoints()),
+    best_effort(true)    
 {
 	L(0)=1;
 	L(1)=1;
@@ -220,7 +222,7 @@ int ChainIkSolverPos_LMA::CartToJnt(const KDL::JntArray& q_init, const KDL::Fram
 			std::cout << std::endl;
 		}
 		dnorm = diffq.lpNorm<Eigen::Infinity>();
-		if (dnorm < eps_joints) {
+		if (!best_effort && dnorm < eps_joints) {
 				lastDifference = delta_pos_norm;
 				lastNrOfIter   = i;
 				lastSV         = svd.singularValues();
@@ -233,7 +235,7 @@ int ChainIkSolverPos_LMA::CartToJnt(const KDL::JntArray& q_init, const KDL::Fram
 		}
 
 
-		if (grad.transpose()*grad < eps_joints*eps_joints ) {
+		if (!best_effort && grad.transpose()*grad < eps_joints*eps_joints ) {
 			compute_fwdpos(q);
 			Twist_to_Eigen( diff( T_base_head, T_base_goal), delta_pos );
 			lastDifference = delta_pos_norm;
@@ -252,11 +254,12 @@ int ChainIkSolverPos_LMA::CartToJnt(const KDL::JntArray& q_init, const KDL::Fram
 		double delta_pos_new_norm = delta_pos_new.norm();
 		rho                       = delta_pos_norm*delta_pos_norm - delta_pos_new_norm*delta_pos_new_norm;
 		rho                      /= diffq.transpose()*(lambda*diffq + grad);
-		if (rho > 0) {
+        //std::cout << "PHIL"<< std::endl;
+		if (rho > 0 || (best_effort && i==(maxiter-1)) ) {
 			q               = q_new;
 			delta_pos       = delta_pos_new;
 			delta_pos_norm  = delta_pos_new_norm;
-			if (delta_pos_norm<eps) {
+			if (delta_pos_norm<eps || (best_effort && i==(maxiter-1))  ) {
 				Twist_to_Eigen( diff( T_base_head, T_base_goal), delta_pos );
 				lastDifference = delta_pos_norm;
 				lastTransDiff  = delta_pos.topRows(3).norm();
@@ -282,6 +285,7 @@ int ChainIkSolverPos_LMA::CartToJnt(const KDL::JntArray& q_init, const KDL::Fram
 	lastSV         = svd.singularValues();
 	lastNrOfIter   = maxiter;
 	q_out.data     = q.cast<double>();
+    std::cout << "KDL: No IK Found" << std::endl;
 	return -3;
 
 }
