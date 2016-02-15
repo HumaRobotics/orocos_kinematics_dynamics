@@ -1,0 +1,12 @@
+Install:
+
+git clone git@github.com:HumaRobotics/orocos_kinematics_dynamics
+cd orocos_kinematics_dynamics
+mkdir buildros
+cd buildros
+cmake .. -DCMAKE_INSTALL_PREFIX=/opt/ros/indigo/   
+make
+sudo make install
+
+# MAKE SURE YOU DON'T HAVE LIBOROCOS AT TOP LEVEL /usr/lib/liborocos-kdl.so
+
